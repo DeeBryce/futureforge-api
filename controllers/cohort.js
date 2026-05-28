@@ -1,4 +1,5 @@
 const Cohort = require('../models/Cohort');
+const getCohortStatus = require('../utils/cohortStatus');
 
 // GET all cohorts
 const getAllCohorts = async (req, res) => {
@@ -82,10 +83,20 @@ const deleteCohort = async (req, res) => {
   }
 };
 
+const getBannerStatus = async (req, res) => {
+  try {
+    const message = await getCohortStatus();
+    res.status(200).json({ message });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 module.exports = {
   getAllCohorts,
   getCohortById,
   createCohort,
+  getBannerStatus,
   updateCohortStatus,
   deleteCohort,
 };

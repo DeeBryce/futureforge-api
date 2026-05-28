@@ -5,12 +5,14 @@ const {
   getAllCohorts,
   getCohortById,
   createCohort,
+  getBannerStatus,
   updateCohortStatus,
   deleteCohort,
 } = require('../controllers/cohort');
 
 // Public routes
 router.get('/', getAllCohorts);
+router.get('/banner', getBannerStatus);
 router.get('/:id', getCohortById);
 
 // Admin only routes
