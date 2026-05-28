@@ -1,84 +1,61 @@
 const Graduate = require('../models/Graduate');
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
 
-// GET all graduates
-const getAllGraduates = async (req, res) => {
-  try {
-    const graduates = await Graduate.find().sort({ name: 1 });
-    res.status(200).json(graduates);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+const getAllGraduates = catchAsync(async (req, res) => {
+  const graduates = await Graduate.find().sort({ name: 1 });
+  res.status(200).json(graduates);
+});
+
+const getGraduateById = catchAsync(async (req, res) => {
+  const graduate = await Graduate.findById(req.params.id);
+  if (!graduate) {
+    throw new AppError('Graduate not found', 404);
   }
-};
+  res.status(200).json(graduate);
+});
 
-// GET single graduate by ID
-const getGraduateById = async (req, res) => {
-  try {
-    const graduate = await Graduate.findById(req.params.id);
-    if (!graduate) {
-      return res.status(404).json({ message: 'Graduate not found' });
-    }
-    res.status(200).json(graduate);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+const createGraduate = catchAsync(async (req, res) => {
+  const { name, photo, currentRole, testimonial, cohort } = req.body;
+
+  if (!name || !currentRole || !testimonial || !cohort) {
+    throw new AppError('Please provide name, currentRole, testimonial and cohort', 400);
   }
-};
 
-// POST create new graduate (admin only)
-const createGraduate = async (req, res) => {
-  try {
-    const { name, photo, currentRole, testimonial, cohort } = req.body;
+  const graduate = await Graduate.create({
+    name,
+    photo,
+    currentRole,
+    testimonial,
+    cohort,
+  });
 
-    if (!name || !currentRole || !testimonial || !cohort) {
-      return res.status(400).json({ message: 'Please provide name, currentRole, testimonial and cohort' });
-    }
+  res.status(201).json(graduate);
+});
 
-    const graduate = await Graduate.create({
-      name,
-      photo,
-      currentRole,
-      testimonial,
-      cohort,
-    });
+const updateGraduate = catchAsync(async (req, res) => {
+  const { name, photo, currentRole, testimonial } = req.body;
 
-    res.status(201).json(graduate);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+  const graduate = await Graduate.findByIdAndUpdate(
+    req.params.id,
+    { name, photo, currentRole, testimonial },
+    { new: true, runValidators: true }
+  );
+
+  if (!graduate) {
+    throw new AppError('Graduate not found', 404);
   }
-};
 
-// PATCH update graduate (admin only)
-const updateGraduate = async (req, res) => {
-  try {
-    const { name, photo, currentRole, testimonial } = req.body;
+  res.status(200).json(graduate);
+});
 
-    const graduate = await Graduate.findByIdAndUpdate(
-      req.params.id,
-      { name, photo, currentRole, testimonial },
-      { new: true, runValidators: true }
-    );
-
-    if (!graduate) {
-      return res.status(404).json({ message: 'Graduate not found' });
-    }
-
-    res.status(200).json(graduate);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+const deleteGraduate = catchAsync(async (req, res) => {
+  const graduate = await Graduate.findByIdAndDelete(req.params.id);
+  if (!graduate) {
+    throw new AppError('Graduate not found', 404);
   }
-};
-
-// DELETE graduate (admin only)
-const deleteGraduate = async (req, res) => {
-  try {
-    const graduate = await Graduate.findByIdAndDelete(req.params.id);
-    if (!graduate) {
-      return res.status(404).json({ message: 'Graduate not found' });
-    }
-    res.status(200).json({ message: 'Graduate deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
+  res.status(200).json({ message: 'Graduate deleted successfully' });
+});
 
 module.exports = {
   getAllGraduates,

@@ -1,96 +1,72 @@
 const bcrypt = require('bcrypt');
 const Admin = require('../models/Admin');
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
 
-// GET logged in admin profile
-const getMe = async (req, res) => {
-  try {
-    const admin = await Admin.findById(req.admin.id).select('-password');
-    if (!admin) {
-      return res.status(404).json({ message: 'Admin not found' });
-    }
-    res.status(200).json(admin);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+const getMe = catchAsync(async (req, res) => {
+  const admin = await Admin.findById(req.admin.id).select('-password');
+  if (!admin) {
+    throw new AppError('Admin not found', 404);
   }
-};
+  res.status(200).json(admin);
+});
 
-// GET all admins
-const getAdmins = async (req, res) => {
-  try {
-    const admins = await Admin.find().select('-password');
-    res.status(200).json(admins);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+const getAdmins = catchAsync(async (req, res) => {
+  const admins = await Admin.find().select('-password');
+  res.status(200).json(admins);
+});
+
+const createAdmin = catchAsync(async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    throw new AppError('Please provide email and password', 400);
   }
-};
 
-// POST create new admin
-const createAdmin = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Please provide email and password' });
-    }
-
-    const existingAdmin = await Admin.findOne({ email });
-    if (existingAdmin) {
-      return res.status(400).json({ message: 'Admin with this email already exists' });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const admin = await Admin.create({ email, password: hashedPassword });
-
-    res.status(201).json({
-      _id: admin._id,
-      email: admin.email,
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+  const existingAdmin = await Admin.findOne({ email });
+  if (existingAdmin) {
+    throw new AppError('Admin with this email already exists', 400);
   }
-};
 
-// PATCH change password
-const changePassword = async (req, res) => {
-  try {
-    const { currentPassword, newPassword } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const admin = await Admin.create({ email, password: hashedPassword });
 
-    if (!currentPassword || !newPassword) {
-      return res.status(400).json({ message: 'Please provide current and new password' });
-    }
+  res.status(201).json({
+    _id: admin._id,
+    email: admin.email,
+  });
+});
 
-    const admin = await Admin.findById(req.admin.id);
-    if (!admin) {
-      return res.status(404).json({ message: 'Admin not found' });
-    }
+const changePassword = catchAsync(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
 
-    const isMatch = await bcrypt.compare(currentPassword, admin.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Current password is incorrect' });
-    }
-
-    admin.password = await bcrypt.hash(newPassword, 10);
-    await admin.save();
-
-    res.status(200).json({ message: 'Password updated successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+  if (!currentPassword || !newPassword) {
+    throw new AppError('Please provide current and new password', 400);
   }
-};
 
-// DELETE admin
-const deleteAdmin = async (req, res) => {
-  try {
-    const admin = await Admin.findByIdAndDelete(req.params.id);
-    if (!admin) {
-      return res.status(404).json({ message: 'Admin not found' });
-    }
-    res.status(200).json({ message: 'Admin deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+  const admin = await Admin.findById(req.admin.id);
+  if (!admin) {
+    throw new AppError('Admin not found', 404);
   }
-};
+
+  const isMatch = await bcrypt.compare(currentPassword, admin.password);
+  if (!isMatch) {
+    throw new AppError('Current password is incorrect', 401);
+  }
+
+  admin.password = await bcrypt.hash(newPassword, 10);
+  await admin.save();
+
+  res.status(200).json({ message: 'Password updated successfully' });
+});
+
+const deleteAdmin = catchAsync(async (req, res) => {
+  const admin = await Admin.findByIdAndDelete(req.params.id);
+  if (!admin) {
+    throw new AppError('Admin not found', 404);
+  }
+  res.status(200).json({ message: 'Admin deleted successfully' });
+});
 
 module.exports = {
   getMe,
