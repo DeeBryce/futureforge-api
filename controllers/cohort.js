@@ -1,5 +1,6 @@
 const Cohort = require('../models/Cohort');
 const getCohortStatus = require('../utils/cohortStatus');
+const Graduate = require('../models/Graduate');
 
 // GET all cohorts
 const getAllCohorts = async (req, res) => {
@@ -18,7 +19,10 @@ const getCohortById = async (req, res) => {
     if (!cohort) {
       return res.status(404).json({ message: 'Cohort not found' });
     }
-    res.status(200).json(cohort);
+
+    const graduates = await Graduate.find({ cohort: req.params.id });
+
+    res.status(200).json({ ...cohort.toObject(), graduates });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
