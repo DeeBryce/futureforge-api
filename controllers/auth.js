@@ -3,9 +3,16 @@ const bcrypt = require('bcrypt');
 const Admin = require('../models/Admin');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const sanitize = require('mongo-sanitize');
+const { validationResult } = require('express-validator');
 
 const loginAdmin = catchAsync(async (req, res) => {
-  const { email, password } = req.body;
+    const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    throw new AppError(errors.array()[0].msg, 400);
+  }
+const email = sanitize(req.body.email);
+const password = sanitize(req.body.password);
 
   if (!email || !password) {
     throw new AppError('Please provide email and password', 400);

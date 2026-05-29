@@ -3,6 +3,7 @@ const getCohortStatus = require('../utils/cohortStatus');
 const Graduate = require('../models/Graduate');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const { validationResult } = require('express-validator');
 
 // GET all cohorts
 const getAllCohorts = catchAsync(async (req, res) => {
@@ -22,6 +23,10 @@ const getCohortById = catchAsync(async (req, res) => {
 
 // POST create new cohort (admin only)
 const createCohort = catchAsync(async (req, res) => {
+    const errors = validationResult(req);
+if (!errors.isEmpty()) {
+  throw new AppError(errors.array()[0].msg, 400);
+}
   const { cohortNumber, startDate } = req.body;
 
   if (!cohortNumber || !startDate) {

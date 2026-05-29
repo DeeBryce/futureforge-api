@@ -1,6 +1,7 @@
 const Graduate = require('../models/Graduate');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const { validationResult } = require('express-validator');
 
 const getAllGraduates = catchAsync(async (req, res) => {
   const graduates = await Graduate.find().sort({ name: 1 });
@@ -16,6 +17,10 @@ const getGraduateById = catchAsync(async (req, res) => {
 });
 
 const createGraduate = catchAsync(async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      throw new AppError(errors.array()[0].msg, 400);
+    }
   const { name, photo, currentRole, testimonial, cohort } = req.body;
 
   if (!name || !currentRole || !testimonial || !cohort) {
