@@ -4,8 +4,11 @@ const app = require('./app'); // Imports the Express setup from app.js
 
 const PORT = process.env.PORT || 3000;
 
+// Senior Dev trick: Support both env variables so neither developer's local setup breaks!
+const dbURI = process.env.MONGO_URI || process.env.MONGODB_URI;
+
 // Connect to Database, THEN start the server
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(dbURI)
     .then(() => {
         console.log('✅ Connected to MongoDB Database');
         app.listen(PORT, () => {
