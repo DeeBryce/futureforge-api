@@ -1,17 +1,21 @@
-const dotenv = require('dotenv');
-dotenv.config();
+require('dotenv').config();
 const mongoose = require('mongoose');
-const app = require('./app');
+const app = require('./app'); // Imports the Express setup from app.js
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
-mongoose.connect(process.env.MONGODB_URI)
+// Senior Dev trick: Support both env variables so neither developer's local setup breaks!
+const dbURI = process.env.MONGO_URI || process.env.MONGODB_URI;
+
+// Connect to Database, THEN start the server
+mongoose.connect(dbURI)
     .then(() => {
-        console.log('Connected to MongoDB');
+        console.log('✅ Connected to MongoDB Database');
         app.listen(PORT, () => {
-            console.log(`Server running on port ${PORT}`);
+            console.log(`🚀 Server is listening on port ${PORT}`);
         });
     })
     .catch((err) => {
-        console.error('Failed to connect to MongoDB', err);
+        console.error('❌ MongoDB connection error:', err);
+        process.exit(1); // Stop the app if the database fails
     });
