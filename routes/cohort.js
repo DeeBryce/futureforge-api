@@ -21,18 +21,24 @@ router.post(
   '/',
   authMiddleware,
   [
-    body('cohortNumber')
-      .isInt()
-      .withMessage('Cohort number must be a number'),
-
-    body('startDate')
-      .notEmpty()
-      .isDate()
-      .withMessage('Please provide a valid start date'),
+    body('cohortNumber').isInt().withMessage('Cohort number must be a number'),
+    body('startDate').notEmpty().isDate().withMessage('Please provide a valid start date'),
+    body('endDate').optional().isDate().withMessage('Please provide a valid end date'),
   ],
   createCohort
 );
-router.patch('/:id/status', authMiddleware, updateCohortStatus);
+
+router.patch(
+  '/:id/status',
+  authMiddleware,
+  [
+    body('status')
+      .isIn(['open', 'ongoing', 'completed'])
+      .withMessage('Status must be open, ongoing, or completed'),
+  ],
+  updateCohortStatus
+);
+
 router.delete('/:id', authMiddleware, deleteCohort);
 
 module.exports = router;

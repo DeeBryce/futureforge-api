@@ -44,6 +44,11 @@ if (!errors.isEmpty()) {
 
 // PATCH update cohort status (admin only)
 const updateCohortStatus = catchAsync(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    throw new AppError(errors.array()[0].msg, 400);
+  }
+
   const { status } = req.body;
 
   if (!status) {
@@ -65,6 +70,11 @@ const updateCohortStatus = catchAsync(async (req, res) => {
 
 // DELETE cohort (admin only)
 const deleteCohort = catchAsync(async (req, res) => {
+  const graduatesCount = await Graduate.countDocuments({ cohort: req.params.id });
+  if (graduatesCount > 0) {
+    throw new AppError('Cannot delete: There are graduates assigned to this cohort.', 400);
+  }
+
   const cohort = await Cohort.findByIdAndDelete(req.params.id);
   if (!cohort) {
     throw new AppError('Cohort not found', 404);

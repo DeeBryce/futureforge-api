@@ -11,8 +11,8 @@ const loginAdmin = catchAsync(async (req, res) => {
   if (!errors.isEmpty()) {
     throw new AppError(errors.array()[0].msg, 400);
   }
-const email = sanitize(req.body.email);
-const password = sanitize(req.body.password);
+const email = sanitize(req.body.email).toLowerCase().trim();
+const password = req.body.password;
 
   if (!email || !password) {
     throw new AppError('Please provide email and password', 400);

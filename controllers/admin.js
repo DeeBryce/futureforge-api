@@ -23,13 +23,15 @@ const createAdmin = catchAsync(async (req, res) => {
     throw new AppError('Please provide email and password', 400);
   }
 
-  const existingAdmin = await Admin.findOne({ email });
+  const sanitizedEmail = email.toLowerCase().trim();
+
+  const existingAdmin = await Admin.findOne({ email: sanitizedEmail });
   if (existingAdmin) {
     throw new AppError('Admin with this email already exists', 400);
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const admin = await Admin.create({ email, password: hashedPassword });
+  const admin = await Admin.create({ email: sanitizedEmail, password: hashedPassword });
 
   res.status(201).json({
     _id: admin._id,

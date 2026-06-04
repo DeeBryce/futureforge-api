@@ -1,7 +1,9 @@
 const Cohort = require('../models/Cohort');
 
 const getCohortStatus = async () => {
-  const cohort = await Cohort.findOne({ status: { $in: ['open', 'ongoing'] } });
+  const cohort = await Cohort.findOne({
+    status: { $in: ['open', 'ongoing'] }
+  }).sort({ cohortNumber: -1 });
 
   if (!cohort) {
     return "No active cohort available.";
