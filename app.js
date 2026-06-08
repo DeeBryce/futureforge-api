@@ -11,9 +11,9 @@ const app = express();
 
 // Global Middleware
 app.use(helmet());
-app.use(express.json());
 app.use(cors());
 app.use(morgan('dev'));
+app.use(express.json());
 
 // Route Prefixes
 app.use('/api/applicants', applicantRoutes); // Your route!
