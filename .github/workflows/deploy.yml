@@ -1,0 +1,49 @@
+name: FutureForge CI/CD Pipeline
+
+# 1. Trigger the workflow every time code is pushed to the main branch
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  test-and-verify:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step A: Download the code from the repository onto the GitHub cloud server
+    - name: Checkout Repository Code
+      uses: actions/checkout@v4
+
+    # Step B: Install the exact Node.js version your project relies on
+    - name: Setup Node.js Environment
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22.x'
+        cache: 'npm'
+
+    # Step C: Install dependencies cleanly (faster and more secure than standard npm install)
+    - name: Install Project Dependencies
+      run: npm ci
+
+    # Step D: Run your automated testing suite (if any tests are configured yet)
+    - name: Run Test Suite
+      run: npm test --if-present
+
+  deploy-to-production:
+    # Only run the deployment job if the test-and-verify job passes perfectly
+    needs: test-and-verify
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step E: Trigger your hosting provider's build hook to instantly pull the fresh code
+    # (This uses a standard webhook deployment URL supported by Render, Heroku, DigitalOcean, etc.)
+    - name: Trigger Production Deploy Hook
+      env:
+        DEPLOY_URL: ${{ secrets.PRODUCTION_DEPLOY_WEBHOOK_URL }}
+      run: |
+        if [ -z "$DEPLOY_URL" ]; then
+          echo "⚠️ DEPLOY_URL secret is missing. Skipping deployment step."
+        else
+          echo "🚀 Code verified! Launching production deployment..."
+          curl -X POST "$DEPLOY_URL"
+        fi
