@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const { lmsSyncQueue } = require('../config/queue');
 const sanitize = require('mongo-sanitize');
 const { validationResult } = require('express-validator');
 
@@ -90,6 +91,22 @@ const redeemAccessCode = async (req, res) => {
       process.env.JWT_SECRET, 
       { expiresIn: '30d' } 
     );
+
+    // ==========================================
+    // DEV 3 FEATURE: Dispatch background sync job
+    // ==========================================
+    await lmsSyncQueue.add('syncNewStudent', {
+        studentId: newStudent._id,
+        fullName: newStudent.fullName,
+        email: newStudent.email,
+        cohortId: validCode.cohort
+    }, {
+        attempts: 3, // Auto-retry 3 times if external LMS API fails
+        backoff: {
+            type: 'exponential',
+            delay: 5000 // Wait 5s before first retry, then 10s, 20s...
+        }
+    });
 
     // 6. Send them across the bridge!
     return res.status(201).json({

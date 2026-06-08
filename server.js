@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('./workers/lmsWorker');
 const mongoose = require('mongoose');
 const app = require('./app'); // Imports the Express setup from app.js
 
