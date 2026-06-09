@@ -5,6 +5,7 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const sanitize = require('mongo-sanitize');
 const { validationResult } = require('express-validator');
+const config = require('../config');
 
 const loginAdmin = catchAsync(async (req, res) => {
     const errors = validationResult(req);
@@ -30,8 +31,8 @@ const password = req.body.password;
 
   const token = jwt.sign(
     { id: admin._id, role: 'admin' },
-    process.env.JWT_SECRET,
-    { expiresIn: '7d' }
+    config.jwtSecret,
+    { expiresIn: config.jwtExpiresIn }
   );
 
   res.status(200).json({
