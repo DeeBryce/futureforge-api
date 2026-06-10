@@ -6,6 +6,7 @@ const errorMiddleware = require('./middleware/errorMiddleware'); // Dev 2's erro
 
 // Import your routes
 const applicantRoutes = require('./routes/applicant');
+const studentRoutes = require('./routes/student');
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use(express.json());
 
 // Route Prefixes
 app.use('/api/applicants', applicantRoutes); // Your route!
+app.use('/api/students', studentRoutes); // Student routes
 app.use('/api/cohorts', require('./routes/cohort')); // Dev 2's routes
 app.use('/api/graduates', require('./routes/graduate'));
 app.use('/api/auth', require('./routes/auth'));
