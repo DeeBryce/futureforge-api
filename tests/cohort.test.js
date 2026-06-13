@@ -9,52 +9,34 @@ let token;
 
 describe('Cohort API Tests', () => {
 
-  // =========================
-  // SETUP
-  // =========================
   beforeAll(async () => {
-    require('dotenv').config();
-
     const uri = process.env.MONGO_URI || process.env.MONGODB_URI;
-    if (!uri) throw new Error('MONGODB_URI missing');
-
     await mongoose.connect(uri);
 
-    // get auth token
     const res = await request(app)
       .post('/api/auth/login')
       .send({
         email: 'admin@futureforgelearning.com',
         password: 'FutureForge@2026',
       });
-
     token = res.body.token;
-  });
+  }, 30000);
 
-  // clean DB after each test
   afterEach(async () => {
     await Cohort.deleteMany({});
   });
 
-  // proper teardown
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-  });
+    await mongoose.disconnect();
+  }, 30000);
 
-  // =========================
-  // POST /api/cohorts
-  // =========================
   describe('POST /api/cohorts', () => {
 
     it('should create cohort successfully (authorized)', async () => {
       const res = await request(app)
         .post('/api/cohorts')
         .set('Authorization', `Bearer ${token}`)
-        .send({
-          cohortNumber: 101,
-          startDate: '2026-01-11'
-        });
+        .send({ cohortNumber: 101, startDate: '2026-01-11' });
 
       expect(res.statusCode).toBe(201);
       expect(res.body.cohortNumber).toBe(101);
@@ -63,10 +45,7 @@ describe('Cohort API Tests', () => {
     it('should reject without token', async () => {
       const res = await request(app)
         .post('/api/cohorts')
-        .send({
-          cohortNumber: 102,
-          startDate: '2026-01-11'
-        });
+        .send({ cohortNumber: 102, startDate: '2026-01-11' });
 
       expect(res.statusCode).toBe(401);
     });
@@ -82,13 +61,9 @@ describe('Cohort API Tests', () => {
 
   });
 
-  // =========================
-  // GET ALL COHORTS
-  // =========================
   describe('GET /api/cohorts', () => {
 
     it('should return all cohorts', async () => {
-
       await Cohort.create({
         cohortNumber: 999 + Math.floor(Math.random() * 1000),
         startDate: '2026-01-11'
@@ -102,9 +77,6 @@ describe('Cohort API Tests', () => {
 
   });
 
-  // =========================
-  // GET SINGLE COHORT
-  // =========================
   describe('GET /api/cohorts/:id', () => {
 
     it('should return a single cohort', async () => {
@@ -121,7 +93,6 @@ describe('Cohort API Tests', () => {
 
     it('should return 404 if not found', async () => {
       const fakeId = new mongoose.Types.ObjectId();
-
       const res = await request(app).get(`/api/cohorts/${fakeId}`);
 
       expect(res.statusCode).toBe(404);
@@ -129,9 +100,6 @@ describe('Cohort API Tests', () => {
 
   });
 
-  // =========================
-  // PATCH STATUS
-  // =========================
   describe('PATCH /api/cohorts/:id/status', () => {
 
     it('should update cohort status', async () => {
@@ -143,7 +111,7 @@ describe('Cohort API Tests', () => {
       const res = await request(app)
         .patch(`/api/cohorts/${cohort._id}/status`)
         .set('Authorization', `Bearer ${token}`)
-        .send({ status: 'ongoing' });
+        .send({ status:'ongoing' });
 
       expect(res.statusCode).toBe(200);
       expect(res.body.status).toBe('ongoing');
@@ -165,9 +133,6 @@ describe('Cohort API Tests', () => {
 
   });
 
-  // =========================
-  // DELETE COHORT
-  // =========================
   describe('DELETE /api/cohorts/:id', () => {
 
     it('should delete cohort', async () => {

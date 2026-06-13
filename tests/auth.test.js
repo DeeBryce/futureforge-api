@@ -5,11 +5,11 @@ const app = require('../app');
 beforeAll(async () => {
   const uri = process.env.MONGO_URI || process.env.MONGODB_URI;
   await mongoose.connect(uri);
-});
+}, 30000);
 
 afterAll(async () => {
   await mongoose.disconnect();
-});
+}, 30000);
 
 describe('Auth Routes', () => {
   describe('POST /api/auth/login', () => {
