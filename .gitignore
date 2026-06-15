@@ -1,4 +1,4 @@
 node_modules
 .env
-.env.test 
+.env.test
 seed.js
