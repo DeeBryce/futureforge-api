@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('./workers/lmsWorker');
 const mongoose = require('mongoose');
 const app = require('./app'); // Imports the Express setup from app.js
 const logger = require('./utils/logger');// Logger added by Dev 2 - replaces console.log with Winston for production-grade logging
