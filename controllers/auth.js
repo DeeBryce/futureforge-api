@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const { lmsSyncQueue } = require('../config/queue');
 const sanitize = require('mongo-sanitize');
 const { validationResult } = require('express-validator');
+const config = require('../config');
 
 const Admin = require('../models/Admin');
 const AccessCode = require('../models/AccessCode');
