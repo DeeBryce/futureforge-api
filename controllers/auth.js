@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const { lmsSyncQueue } = require('../config/queue');
 const sanitize = require('mongo-sanitize');
 const { validationResult } = require('express-validator');
+const config = require('../config');
 
 const Admin = require('../models/Admin');
 const AccessCode = require('../models/AccessCode');
@@ -39,8 +40,8 @@ const loginAdmin = catchAsync(async (req, res) => {
 
   const token = jwt.sign(
     { id: admin._id, role: 'admin' },
-    process.env.JWT_SECRET,
-    { expiresIn: '7d' }
+    config.jwtSecret,
+    { expiresIn: config.jwtExpiresIn }
   );
 
   res.status(200).json({

@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const errorMiddleware = (err, req, res, next) => {
   // Fallback values if the error doesn't explicitly have them set
   err.statusCode = err.statusCode || 500;

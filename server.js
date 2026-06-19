@@ -2,21 +2,23 @@ require('dotenv').config();
 require('./workers/lmsWorker');
 const mongoose = require('mongoose');
 const app = require('./app'); // Imports the Express setup from app.js
+const logger = require('./utils/logger');// Logger added by Dev 2 - replaces console.log with Winston for production-grade logging
+const config = require('./config'); // Centralized config file for environment variables
 
-const PORT = process.env.PORT || 3000;
+const PORT = config.port;
 
 // Senior Dev trick: Support both env variables so neither developer's local setup breaks!
-const dbURI = process.env.MONGO_URI || process.env.MONGODB_URI;
+const dbURI = config.mongoUri;
 
 // Connect to Database, THEN start the server
 mongoose.connect(dbURI)
     .then(() => {
-        console.log('✅ Connected to MongoDB Database');
+        logger.info('✅ Connected to MongoDB Database');
         app.listen(PORT, () => {
-            console.log(`🚀 Server is listening on port ${PORT}`);
+            logger.info(`🚀 Server is listening on port ${PORT}`);
         });
     })
     .catch((err) => {
-        console.error('❌ MongoDB connection error:', err);
+        logger.error('❌ MongoDB connection error:', { error: err.message });
         process.exit(1); // Stop the app if the database fails
     });
