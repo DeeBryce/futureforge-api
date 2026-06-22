@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const Admin = require('../models/admin');
+const Admin = require('../models/Admin');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
