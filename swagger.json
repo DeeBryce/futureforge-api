@@ -1,0 +1,332 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "FutureForge Core API Backend",
+    "version": "1.1.0",
+    "description": "Interactive API documentation for the FutureForge LMS portal ecosystem. Includes full Admin & Content architecture."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local Development Server"
+    }
+  ],
+  "tags": [
+    { "name": "Gateway", "description": "Student registration and payment webhooks" },
+    { "name": "Auth Bridge", "description": "LMS access code redemption" },
+    { "name": "Admin Auth", "description": "Administrative login and token generation" },
+    { "name": "Cohorts", "description": "Cohort lifecycle and banner management" },
+    { "name": "Graduates", "description": "Success stories and testimonials" },
+    { "name": "Admin Management", "description": "Admin profile and credentials management" }
+  ],
+  "paths": {
+    "/api/applicants/register": {
+      "post": {
+        "summary": "Register a new applicant",
+        "tags": ["Gateway"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["fullName", "email", "dateOfBirth", "whatsappNumber", "gender", "country", "state", "highestEducation", "areaOfInterest", "levelOfExperience", "reasonForJoining", "agreedToFee", "agreedToTerms", "consentedToPrivacy"],
+                "properties": {
+                  "fullName": { "type": "string", "example": "Test Forger" },
+                  "email": { "type": "string", "example": "oesigbone@gmail.com" },
+                  "dateOfBirth": { "type": "string", "format": "date", "example": "1998-08-15" },
+                  "whatsappNumber": { "type": "string", "example": "+2348123456789" },
+                  "gender": { "type": "string", "example": "Male" },
+                  "country": { "type": "string", "example": "Nigeria" },
+                  "state": { "type": "string", "example": "Lagos" },
+                  "highestEducation": { "type": "string", "example": "BSc" },
+                  "areaOfInterest": { "type": "string", "example": "Backend" },
+                  "levelOfExperience": { "type": "string", "example": "Intermediate" },
+                  "reasonForJoining": { "type": "string", "example": "I want to transition into tech and learn to build robust APIs." },
+                  "agreedToFee": { "type": "boolean", "example": true },
+                  "agreedToTerms": { "type": "boolean", "example": true },
+                  "consentedToPrivacy": { "type": "boolean", "example": true },
+                  "cohortId": { "type": "string", "example": "507f1f77bcf86cd799439011" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Registration saved successfully. Redirecting to payment." }
+        }
+      }
+    },
+    "/api/applicants": {
+      "get": {
+        "summary": "Get list of applicants",
+        "description": "Fetch all applicants or filter by payment status. For use by the Admin Dashboard.",
+        "tags": ["Gateway"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "hasPaid",
+            "in": "query",
+            "required": false,
+            "description": "Filter by payment status. Use 'true' for enrolled students, 'false' for abandoned checkouts.",
+            "schema": { "type": "boolean", "example": true }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Array of applicant objects and total count." },
+          "401": { "description": "Unauthorized. Admin token required." }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Admin Login",
+        "tags": ["Admin Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "example": "admin@futureforge.com" },
+                  "password": { "type": "string", "example": "SuperSecurePassword123" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Returns JWT token" }
+        }
+      }
+    },
+    "/api/cohorts": {
+      "get": {
+        "summary": "Get all cohorts",
+        "description": "Returns array of all cohorts in reverse chronological order",
+        "tags": ["Cohorts"],
+        "responses": { "200": { "description": "Success" } }
+      },
+      "post": {
+        "summary": "Create a new cohort",
+        "tags": ["Cohorts"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["cohortNumber", "startDate"],
+                "properties": {
+                  "cohortNumber": { "type": "number", "example": 5 },
+                  "startDate": { "type": "string", "format": "date", "example": "2026-09-01" },
+                  "endDate": { "type": "string", "format": "date", "example": "2026-12-01" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Created cohort object" } }
+      }
+    },
+    "/api/cohorts/banner": {
+      "get": {
+        "summary": "Get dynamic banner text",
+        "description": "Returns dynamic banner text based on active cohort status",
+        "tags": ["Cohorts"],
+        "responses": { "200": { "description": "Banner message string" } }
+      }
+    },
+    "/api/cohorts/{id}": {
+      "get": {
+        "summary": "Get single cohort",
+        "description": "Returns cohort object with graduates array populated",
+        "tags": ["Cohorts"],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "Cohort object" } }
+      },
+      "delete": {
+        "summary": "Delete cohort",
+        "description": "Blocked if graduates exist in the cohort",
+        "tags": ["Cohorts"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "Deletion success message" } }
+      }
+    },
+    "/api/cohorts/{id}/status": {
+      "patch": {
+        "summary": "Update cohort status",
+        "tags": ["Cohorts"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["status"],
+                "properties": {
+                  "status": { "type": "string", "enum": ["open", "ongoing", "completed"], "example": "ongoing" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Updated cohort object" } }
+      }
+    },
+    "/api/graduates": {
+      "get": {
+        "summary": "Get all graduates",
+        "tags": ["Graduates"],
+        "responses": { "200": { "description": "Array of all graduates" } }
+      },
+      "post": {
+        "summary": "Create new graduate",
+        "tags": ["Graduates"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "currentRole", "testimonial", "cohort"],
+                "properties": {
+                  "name": { "type": "string", "example": "Chidi N." },
+                  "photo": { "type": "string", "example": "https://url-to-photo.jpg" },
+                  "currentRole": { "type": "string", "example": "Backend Developer at Moniepoint" },
+                  "testimonial": { "type": "string", "example": "FutureForge changed my career..." },
+                  "cohort": { "type": "string", "example": "507f1f77bcf86cd799439011" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Created graduate object" } }
+      }
+    },
+    "/api/graduates/{id}": {
+      "get": {
+        "summary": "Get single graduate",
+        "tags": ["Graduates"],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "Single graduate object" } }
+      },
+      "patch": {
+        "summary": "Update graduate",
+        "tags": ["Graduates"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "photo": { "type": "string" },
+                  "currentRole": { "type": "string" },
+                  "testimonial": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Updated graduate object" } }
+      },
+      "delete": {
+        "summary": "Delete graduate",
+        "tags": ["Graduates"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "Deletion success message" } }
+      }
+    },
+    "/api/admin/me": {
+      "get": {
+        "summary": "Get my admin profile",
+        "tags": ["Admin Management"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": { "200": { "description": "Admin profile without password" } }
+      }
+    },
+    "/api/admin": {
+      "get": {
+        "summary": "Get all admins",
+        "tags": ["Admin Management"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": { "200": { "description": "Array of all admins without passwords" } }
+      },
+      "post": {
+        "summary": "Create new admin",
+        "tags": ["Admin Management"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "example": "newadmin@futureforge.com" },
+                  "password": { "type": "string", "example": "NewSecurePass123" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Created admin ID and email" } }
+      }
+    },
+    "/api/admin/password": {
+      "patch": {
+        "summary": "Change admin password",
+        "tags": ["Admin Management"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["currentPassword", "newPassword"],
+                "properties": {
+                  "currentPassword": { "type": "string", "example": "OldPass123" },
+                  "newPassword": { "type": "string", "example": "NewPass456" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Password update success message" } }
+      }
+    },
+    "/api/admin/{id}": {
+      "delete": {
+        "summary": "Delete an admin",
+        "tags": ["Admin Management"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "Deletion success message" } }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Enter your Admin JWT token in the format: Bearer <token>"
+      }
+    }
+  }
+}

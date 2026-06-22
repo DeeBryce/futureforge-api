@@ -1,30 +1,66 @@
-const crypto = require('crypto'); // Built-in Node module for secure random strings
+const crypto = require('crypto');
 const Applicant = require('../models/Applicant');
-const AccessCode = require('../models/AccessCode'); // Your new schema
-const Cohort = require('../models/Cohort'); // Dev 2's schema
+const AccessCode = require('../models/AccessCode');
+const Cohort = require('../models/Cohort');
+const axios = require('axios');
 const { Resend } = require('resend');
 
-// Initialize Resend
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// POST: Register new applicant
+// ==========================================
+// STEP 1: REGISTER PENDING APPLICANT
+// ==========================================
 exports.registerApplicant = async (req, res) => {
     try {
-        const newApplicant = new Applicant(req.body);
+        // 1. Save the Applicant Data as "Pending"
+        const applicantData = { ...req.body, hasPaid: false };
+        const newApplicant = new Applicant(applicantData);
         await newApplicant.save();
 
+        // 2. Prepare the payload for Paystack
+        const paystackPayload = {
+            email: newApplicant.email,
+            amount: 2000 * 100, // Paystack requires the amount in Kobo (e.g., 50,000 Naira * 100)
+            
+            // PRO TIP: Pass the database ID in the metadata! 
+            // When the webhook fires later, it makes finding the user 100x easier.
+            metadata: {
+                applicant_id: newApplicant._id
+            },
+            
+            // Optional: Where Paystack should redirect the user after they pay
+            callback_url: "https://your-frontend-url.com/payment-success" 
+        };
+
+        // 3. Make the POST request to Paystack's API
+        const paystackResponse = await axios.post(
+            'https://api.paystack.co/transaction/initialize',
+            paystackPayload,
+            {
+                headers: {
+                    Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        // 4. Send the generated link back to the frontend
         return res.status(201).json({ 
-            message: 'Registration saved successfully. Proceed to payment.',
+            message: 'Registration saved. Redirecting to payment...',
             applicantId: newApplicant._id,
-            email: newApplicant.email
+            paymentLink: paystackResponse.data.data.authorization_url // This is the magical link!
         });
+
     } catch (error) {
-        console.error('Registration Error:', error.message);
-        return res.status(400).json({ error: error.message });
+        // If Paystack fails, catch it cleanly
+        console.error('Registration/Payment Error:', error.response?.data || error.message);
+        return res.status(500).json({ error: 'Failed to initialize payment process.' });
     }
 };
 
-// POST: Handle Payment Webhook
+// ==========================================
+// PAYSTACK WEBHOOK (UPDATE LEDGER ONLY)
+// ==========================================
 exports.handlePaymentWebhook = async (req, res) => {
     const { event, data } = req.body;
 
@@ -33,63 +69,55 @@ exports.handlePaymentWebhook = async (req, res) => {
         const paymentReference = data.reference;
 
         try {
-            // 1. Mark Applicant as Paid
+            // 1. Find the pending applicant by email and mark them as paid
             const updatedApplicant = await Applicant.findOneAndUpdate(
                 { email: userEmail },
                 { hasPaid: true, paymentReference: paymentReference },
-                { returnDocument: 'after' }
+                { new: true } // Returns the updated document
             );
 
             if (!updatedApplicant) {
                 return res.status(404).json({ error: 'Applicant not found in database' });
             }
 
-            // 2. Find the Latest Active Cohort (Dev 2's Data)
-            const activeCohort = await Cohort.findOne({ 
-                status: { $in: ['open', 'ongoing'] } 
-            }).sort({ cohortNumber: -1 });
-
-            if (!activeCohort) {
-                throw new Error("Cannot generate code: No active cohort found in database.");
-            }
-
-            // 3. Generate a Secure Access Code (e.g., "FF-A7B89C")
-            const rawCode = crypto.randomBytes(3).toString('hex').toUpperCase();
-            const finalAccessCode = `FF-${rawCode}`;
-
-            // 4. Save Code to Database
-            const newAccessCode = new AccessCode({
-                code: finalAccessCode,
-                applicant: updatedApplicant._id,
-                cohort: activeCohort._id
-            });
-            await newAccessCode.save();
-
-            // 5. Send Welcome Email with the Code
-            const emailResponse = await resend.emails.send({
-                from: 'onboarding@resend.dev',
-                to: 'oesigbone10@gmail.com', // Keep your test email here for now
-                subject: 'Welcome to the FutureForge Cohort! Here is your Access Code',
-                html: `
-                    <h2>Payment Confirmed! ✅</h2>
-                    <p>Hi ${updatedApplicant.fullName},</p>
-                    <p>Your payment (Ref: ${paymentReference}) was successful.</p>
-                    <div style="background-color: #f4f4f4; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                        <p style="margin: 0; font-size: 16px;">Your Single-Use Access Code:</p>
-                        <h1 style="margin: 5px 0; color: #333; letter-spacing: 2px;">${finalAccessCode}</h1>
-                    </div>
-                    <p>Keep this code safe. You will need it to unlock your portal when the cohort begins!</p>
-                `
-            });
-
-            console.log(`✅ Payment verified & Code generated for: ${userEmail}`);
+            console.log(`✅ Payment verified & Applicant marked as paid: ${userEmail}`);
             return res.status(200).json({ message: 'Webhook processed successfully' });
 
         } catch (error) {
             console.error('Webhook Error:', error);
-            // Even if email/code generation fails, we return 200 to Paystack so they don't keep retrying the webhook
-            return res.status(200).json({ error: 'Internal Server Error during processing' });
+            return res.status(500).json({ error: 'Internal Server Error during processing' });
         }
     }
+    
     return res.status(200).json({ message: 'Event received but not processed' });
+};
+
+// ==========================================
+// GET ALL APPLICANTS (ADMIN ONLY)
+// ==========================================
+exports.getApplicants = async (req, res) => {
+    try {
+        // We can use query parameters to filter. 
+        // e.g., /api/applicants?hasPaid=true
+        const filter = {};
+        
+        if (req.query.hasPaid !== undefined) {
+            // Convert the string 'true'/'false' from the URL to a boolean
+            filter.hasPaid = req.query.hasPaid === 'true'; 
+        }
+
+        // Fetch applicants from DB, sorted by newest first
+        const applicants = await Applicant.find(filter)
+            .populate('cohortId', 'cohortNumber startDate') // Optional: bring in cohort details
+            .sort({ createdAt: -1 });
+
+        return res.status(200).json({
+            count: applicants.length,
+            applicants: applicants
+        });
+
+    } catch (error) {
+        console.error('Fetch Applicants Error:', error);
+        return res.status(500).json({ error: 'Failed to fetch applicants' });
+    }
 };

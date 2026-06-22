@@ -1,8 +1,10 @@
 const express = require('express');
-const helmet = require('helmet'); // Dev 2's security addition
-const cors = require('cors'); // Prevents frontend connection errors
-const morgan = require('morgan'); // Logs network requests to your terminal
-const errorMiddleware = require('./middleware/errorMiddleware'); // Dev 2's error handler
+const helmet = require('helmet');
+const cors = require('cors'); 
+const morgan = require('morgan');
+const errorMiddleware = require('./middleware/errorMiddleware');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger.json');
 
 // Import your routes
 const applicantRoutes = require('./routes/applicant');
@@ -14,6 +16,7 @@ app.use(helmet());
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Route Prefixes
 app.use('/api/applicants', applicantRoutes); // Your route!
