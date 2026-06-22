@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const applicantController = require('../controllers/applicant');
-const authMiddleware = require('../middlewares/authMiddleware');
+const authMiddleware = require('../middleware/authMiddleware');
 
 // Public route: Students registering
 router.post('/register', applicantController.registerApplicant);
