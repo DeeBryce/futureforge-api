@@ -28,14 +28,10 @@ const studentSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Mongoose Middleware: Automatically hash the password before saving
-studentSchema.pre('save', async function() {
-  // 1. If the password wasn't modified (e.g., just updating their name later), skip this
-  if (!this.isModified('password')) {
-    return; // Just return, do not call next()
-  }
-
-  // 2. Hash the password with a salt round of 12
-  const salt = await bcrypt.genSalt(12);
+studentSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
+  
+  const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   
   // Mongoose automatically moves on when this async function finishes!

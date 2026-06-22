@@ -8,14 +8,19 @@ const swaggerDocument = require('./swagger.json');
 
 // Import your routes
 const applicantRoutes = require('./routes/applicant');
+const studentRoutes = require('./routes/student');
+const cohortRoutes = require('./routes/cohort');
+const graduateRoutes = require('./routes/graduate');
+const authRoutes = require('./routes/auth');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 
 // Global Middleware
 app.use(helmet());
 app.use(cors());
-app.use(morgan('dev'));
 app.use(express.json());
+app.use(morgan('dev'));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Route Prefixes

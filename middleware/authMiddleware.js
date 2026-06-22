@@ -1,3 +1,4 @@
+const config = require('../config');
 const jwt = require('jsonwebtoken');
 const Admin = require('../models/Admin'); // Adjust path if your models folder is elsewhere
 
