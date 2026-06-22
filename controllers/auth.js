@@ -5,7 +5,7 @@ const sanitize = require('mongo-sanitize');
 const { validationResult } = require('express-validator');
 const config = require('../config');
 
-const Admin = require('../models/Admin');
+const Admin = require('../models/admin');
 const AccessCode = require('../models/AccessCode');
 const Student = require('../models/Student');
 const Applicant = require('../models/Applicant');
