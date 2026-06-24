@@ -12,15 +12,31 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // ==========================================
 exports.registerApplicant = async (req, res) => {
     try {
-        // 1. Save the Applicant Data as "Pending"
-        const applicantData = { ...req.body, hasPaid: false };
+        // 1. Fetch the currently active cohort from the database
+        // (Adjust the query condition '{ status: 'active' }' to match your actual Cohort schema)
+        const activeCohort = await Cohort.findOne({ status: 'open' });
+
+        if (!activeCohort) {
+            return res.status(400).json({ 
+                error: 'Registration is currently closed. No active cohort found.' 
+            });
+        }
+
+        // 2. Save the Applicant Data
+        // Notice we are injecting the cohortId securely on the server now!
+        const applicantData = { 
+            ...req.body, 
+            cohortId: activeCohort._id, 
+            hasPaid: false 
+        };
+        
         const newApplicant = new Applicant(applicantData);
         await newApplicant.save();
 
-        // 2. Prepare the payload for Paystack
+        // 3. Prepare the payload for Paystack
         const paystackPayload = {
             email: newApplicant.email,
-            amount: 2000 * 100, // Paystack requires the amount in Kobo (e.g., 50,000 Naira * 100)
+            amount: 2000 * 100, // Paystack requires the amount in Kobo (e.g., 20,000 Naira * 100)
             
             // PRO TIP: Pass the database ID in the metadata! 
             // When the webhook fires later, it makes finding the user 100x easier.
@@ -28,11 +44,10 @@ exports.registerApplicant = async (req, res) => {
                 applicant_id: newApplicant._id
             },
             
-            // Optional: Where Paystack should redirect the user after they pay
-            callback_url: "https://your-frontend-url.com/payment-success" 
+            callback_url: "https://futureforge-project-gules.vercel.app/success-page" 
         };
 
-        // 3. Make the POST request to Paystack's API
+        // 4. Make the POST request to Paystack's API
         const paystackResponse = await axios.post(
             'https://api.paystack.co/transaction/initialize',
             paystackPayload,
@@ -44,7 +59,7 @@ exports.registerApplicant = async (req, res) => {
             }
         );
 
-        // 4. Send the generated link back to the frontend
+        // 5. Send the generated link back to the frontend
         return res.status(201).json({ 
             message: 'Registration saved. Redirecting to payment...',
             applicantId: newApplicant._id,
