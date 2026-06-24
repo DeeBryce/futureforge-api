@@ -1,6 +1,6 @@
 const config = require('../config');
 const jwt = require('jsonwebtoken');
-const Admin = require('../models/Admin'); // Adjust path if your models folder is elsewhere
+const Admin = require('../models/admin'); // Adjust path if your models folder is elsewhere
 
 const authMiddleware = async (req, res, next) => {
   const authHeader = req.headers.authorization;

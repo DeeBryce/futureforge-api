@@ -15,6 +15,11 @@ const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 
 const app = express();
+app.set('trust proxy', 1);
+
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
 
 // Global Middleware
 app.use(helmet());
