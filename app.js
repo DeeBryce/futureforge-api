@@ -13,6 +13,7 @@ const cohortRoutes = require('./routes/cohort');
 const graduateRoutes = require('./routes/graduate');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
+const facilitatorRoutes = require('./routes/facilitatorRoutes');
 
 const app = express();
 app.set('trust proxy', 1);

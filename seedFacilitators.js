@@ -1,7 +1,7 @@
 // seedFacilitators.js
 require('dotenv').config(); // Loads your .env file
 const mongoose = require('mongoose');
-const Facilitator = require('./models/Facilitator'); // Adjust path if needed
+const Facilitator = require('./models/facilitator'); // Adjust path if needed
 
 // 1. The Dummy Data Array (Matching your Schema)
 const facilitatorsData = [
