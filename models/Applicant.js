@@ -51,7 +51,7 @@ const applicantSchema = new mongoose.Schema({
     areaOfInterest: {
         type: String,
         required: [true, 'Area of interest is required'],
-        enum: ['Frontend', 'Backend', 'Product Design', 'Data Science', 'Other'] 
+        enum: ['Frontend', 'Backend', 'Product Design', 'Product Management', 'Quality Assurance', 'Other'] 
     },
     levelOfExperience: {
         type: String,
