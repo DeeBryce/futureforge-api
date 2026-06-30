@@ -44,7 +44,7 @@ const applicantSchema = new mongoose.Schema({
     highestEducation: {
         type: String,
         required: [true, 'Highest level of education is required'],
-        enum: ['High School', 'SSCE', 'OND', 'HND', 'BSc', 'MSc', 'PhD', 'Other']
+        enum: ['High School', 'SSCE', 'OND', 'HND', 'BSc', 'Masters', 'PhD', 'Other']
     },
 
     // --- PROGRAMME INFORMATION ---
