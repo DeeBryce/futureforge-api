@@ -56,7 +56,7 @@ const applicantSchema = new mongoose.Schema({
     levelOfExperience: {
         type: String,
         required: [true, 'Level of experience is required'],
-        enum: ['Beginner', 'Intermediate', 'Advanced']
+        enum: ['Beginner', 'Intermediate', 'Expert']
     },
     reasonForJoining: {
         type: String,
