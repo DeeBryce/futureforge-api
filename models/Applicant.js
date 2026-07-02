@@ -76,10 +76,6 @@ const applicantSchema = new mongoose.Schema({
     agreedToFee: {
         type: Boolean,
         required: [true, 'You must agree to the non-refundable fee'],
-        validate: {
-            validator: function(v) { return v === true; },
-            message: 'You must agree to the non-refundable fee to proceed'
-        }
     },
     agreedToTerms: {
         type: Boolean,
