@@ -88,7 +88,7 @@ exports.handlePaymentWebhook = async (req, res) => {
             const updatedApplicant = await Applicant.findOneAndUpdate(
                 { email: userEmail },
                 { hasPaid: true, paymentReference: paymentReference },
-                { new: true } // Returns the updated document
+                { returnDocument: 'after' } // Returns the updated document
             );
 
             if (!updatedApplicant) {
