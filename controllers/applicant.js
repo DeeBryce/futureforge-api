@@ -21,8 +21,12 @@ exports.registerApplicant = async (req, res) => {
                 error: 'Registration is currently closed. No active cohort found.' 
             });
         }
-
-        // 2. Save the Applicant Data
+        // 2. Check if email already exists
+        const existingApplicant = await Applicant.findOne({ email: req.body.email });
+        if (existingApplicant) {
+            return res.status(409).json({ error: 'Email is already registered.' });
+        }
+        // 3. Save the Applicant Data
         // Notice we are injecting the cohortId securely on the server now!
         const applicantData = { 
             ...req.body, 
