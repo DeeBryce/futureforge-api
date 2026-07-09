@@ -128,7 +128,7 @@ exports.handlePaymentWebhook = async (req, res) => {
                     // EMAIL 1: To the Applicant
                     resend.emails.send({
                         from: 'FutureForge Admissions <onboarding@resend.dev>', // Update to your verified domain later
-                        to: userEmail,
+                        to: 'oesigbone@gmail.com', // Change to updatedApplicant.email when ready for production
                         subject: 'Registration & Payment Confirmed - Welcome to FutureForge!',
                         html: `
                             <div style="font-family: Arial, sans-serif; color: #334155; line-height: 1.6; max-width: 600px;">
@@ -157,7 +157,7 @@ exports.handlePaymentWebhook = async (req, res) => {
                     // EMAIL 2: To the Admin
                     resend.emails.send({
                         from: 'FutureForge System <onboarding@resend.dev>', // Update to your verified domain later
-                        to: 'oesigbone10@gmail.com',
+                        to: 'oesigbone@gmail.com',
                         subject: `New Successful Registration: ${applicantName} (${track})`,
                         html: `
                             <div style="font-family: Arial, sans-serif; color: #1e293b; line-height: 1.6; max-width: 600px;">
