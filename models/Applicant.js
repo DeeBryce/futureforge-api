@@ -44,19 +44,19 @@ const applicantSchema = new mongoose.Schema({
     highestEducation: {
         type: String,
         required: [true, 'Highest level of education is required'],
-        enum: ['SSCE', 'OND', 'HND', 'BSc', 'MSc', 'PhD', 'Other']
+        enum: ['High School', 'SSCE', 'OND', 'HND', 'BSc', 'Masters', 'PhD', 'Other']
     },
 
     // --- PROGRAMME INFORMATION ---
     areaOfInterest: {
         type: String,
         required: [true, 'Area of interest is required'],
-        enum: ['Frontend', 'Backend', 'Product Design', 'Data Science', 'Other'] 
+        enum: ['Frontend', 'Backend', 'ProductDesign', 'ProductManagement', 'Qa', 'Other'] 
     },
     levelOfExperience: {
         type: String,
         required: [true, 'Level of experience is required'],
-        enum: ['Beginner', 'Intermediate', 'Advanced']
+        enum: ['Beginner', 'Intermediate', 'Expert']
     },
     reasonForJoining: {
         type: String,
@@ -75,11 +75,8 @@ const applicantSchema = new mongoose.Schema({
     // --- AGREEMENTS & CONSENT ---
     agreedToFee: {
         type: Boolean,
-        required: [true, 'You must agree to the non-refundable fee'],
-        validate: {
-            validator: function(v) { return v === true; },
-            message: 'You must agree to the non-refundable fee to proceed'
-        }
+        required: false,
+        default: false,
     },
     agreedToTerms: {
         type: Boolean,

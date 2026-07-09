@@ -1,4 +1,4 @@
-const Facilitator = require('../models/Facilitator');
+const Facilitator = require('../models/facilitator');
 
 exports.getAllFacilitators = async (req, res) => {
     try {
