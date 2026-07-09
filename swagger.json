@@ -317,6 +317,40 @@
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
         "responses": { "200": { "description": "Deletion success message" } }
       }
+    },
+    "/api/applicants/webhook/payment": {
+      "post": {
+        "tags": ["Gateway"],
+        "summary": "Paystack payment webhook listener",
+        "description": "Receives the charge.success event securely from Paystack to update the applicant's ledger to hasPaid: true.",
+        "responses": {
+          "200": {
+            "description": "Webhook processed successfully (or unhandled event acknowledged)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Webhook processed successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid Paystack Signature"
+          },
+          "404": {
+            "description": "Applicant not found in database"
+          },
+          "500": {
+            "description": "Internal Server Error during processing"
+          }
+        }
+      }
     }
   },
   "components": {
