@@ -6,10 +6,10 @@ const Facilitator = require('./models/facilitator'); // Adjust path if needed
 // 1. The Dummy Data Array (Matching your Schema)
 const facilitatorsData = [
   {
-    name: "Annette Black",
+    name: "Blessing Peters",
     track: "Frontend Development",
-    imageUrl: "/images/Invisible.png",
-    bio: "Annette is a senior frontend engineer with 6 years of experience building scalable React applications. She specializes in UI/UX architecture and performance optimization."
+    imageUrl: "https://res.cloudinary.com/xo4vcrec/image/upload/f_auto,q_auto/Blessing_Peters_m3ihsc",
+    bio: "Blessing is a senior frontend engineer with 6 years of experience building scalable React applications. She specializes in UI/UX architecture and performance optimization."
   },
   {
     name: "Devon Lane",
