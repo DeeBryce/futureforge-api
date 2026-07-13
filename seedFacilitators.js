@@ -18,10 +18,10 @@ const facilitatorsData = [
     bio: "Ubong is a backend architect who has designed robust APIs for fintech platforms. He focuses on Node.js, database optimization, and scalable microservices."
   },
   {
-    name: "Courtney Henry",
-    track: "Product Design",
-    imageUrl: "/images/Invisible.png",
-    bio: "Courtney is an award-winning product designer. She brings a deep understanding of human-centered design, user research, and advanced Figma prototyping."
+    name: "Osuohia Emmanuel",
+    track: "Frontend Development",
+    imageUrl: "https://res.cloudinary.com/xo4vcrec/image/upload/f_auto,q_auto/Osuohia_Emmanuel_c_ao3lxb",
+    bio: "Emmanuel is an experienced frontend developer passionate about building beautiful and responsive web applications."
   },
   {
     name: "Azuka Chukwuma",
@@ -42,11 +42,23 @@ const facilitatorsData = [
     bio: "Mitchel is a skilled backend developer with expertise in building robust APIs and scalable server-side applications. He has a strong foundation in Node.js, database design, and cloud infrastructure."
   },
   {
-     name: "Tobi Oyetunji",
-  track: "Product Management",
-  imageUrl: "https://res.cloudinary.com/xo4vcrec/image/upload/f_auto,q_auto/Tobi_Oyetunji_s_headshot_-_Tobi_Oyetunji_buity9",
-  bio: "Tobi is a strategic product manager with a strong ability to bridge the gap between business goals and technical execution. Experienced in roadmap planning, stakeholder communication, agile methodologies, and delivering products that users love."
-  }
+    name: "Nnennaya Okereke",
+    track: "Product Management",
+    imageUrl: "https://res.cloudinary.com/xo4vcrec/image/upload/f_auto,q_auto/Nnennaya_Okereke_gpwfod",
+    bio: "Nnennaya is a strategic product manager with a strong ability to bridge the gap between business goals and technical execution. Experienced in roadmap planning, stakeholder communication, agile methodologies, and delivering products that users love."
+  },
+  {
+    name: "Tobi Oyetunji",
+    track: "Product Management",
+    imageUrl: "https://res.cloudinary.com/xo4vcrec/image/upload/f_auto,q_auto/Tobi_Oyetunji_s_headshot_-_Tobi_Oyetunji_buity9",
+    bio: "Tobi is a strategic product manager with a strong ability to bridge the gap between business goals and technical execution. Experienced in roadmap planning, stakeholder communication, agile methodologies, and delivering products that users love."
+  },
+  {
+    name: "Somto Oli",
+    track: "Quality Assurance",
+    imageUrl: "https://res.cloudinary.com/xo4vcrec/image/upload/f_auto,q_auto/Somto_Oli_aagtkq",
+    bio: "Somto is a detail-oriented software tester with a passion for ensuring quality and reliability in every product. Skilled in manual and automated testing, bug tracking, and writing comprehensive test cases to deliver flawless user experiences."
+  },
 ];
 
 // 2. The Injection Engine
