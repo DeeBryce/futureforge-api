@@ -112,9 +112,9 @@ exports.handlePaymentWebhook = async (req, res) => {
             // 3. PREPARE EMAIL DATA
             // Adjust these variable names if your Mongoose schema uses different keys (e.g. firstName instead of fullName)
             const applicantName = updatedApplicant.fullName || 'Applicant';
-            const track = updatedApplicant.track || updatedApplicant.selectedTrack || 'FutureForge Track';
+            const track = updatedApplicant.areaOfInterest || updatedApplicant.selectedTrack || 'FutureForge Track';
             const cohortNum = updatedApplicant.cohortId?.cohortNumber || 'Current Cohort';
-            const phone = updatedApplicant.phoneNumber || updatedApplicant.phone || 'N/A';
+            const phone = updatedApplicant.phoneNumber || updatedApplicant.whatsappNumber || 'N/A';
             const location = `${updatedApplicant.state || 'N/A'}, ${updatedApplicant.country || 'N/A'}`;
             const notes = updatedApplicant.notes || updatedApplicant.additionalNotes || 'None provided';
             
